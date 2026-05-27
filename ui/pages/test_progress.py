@@ -66,14 +66,14 @@ class TestProgressPage(QWidget):
         legend_row = QHBoxLayout()
         legend_row.setSpacing(16)
         for label, color in [
-            ("Pending", "#45475a"), ("Running", "#f9e2af"),
-            ("Pass", "#a6e3a1"), ("Fail", "#f38ba8"),
-            ("Error", "#fab387"), ("N/T", "#89dceb"), ("N/A", "#a6adc8"),
+            ("Pending", "#94a3b8"), ("Running", "#ca8a04"),
+            ("Pass", "#16a34a"), ("Fail", "#dc2626"),
+            ("Error", "#d97706"), ("N/T", "#0891b2"), ("N/A", "#64748b"),
         ]:
             dot = QLabel("●")
             dot.setStyleSheet(f"color: {color}; font-size: 16px;")
             lbl = QLabel(label)
-            lbl.setStyleSheet("color: #6c7086; font-size: 12px;")
+            lbl.setStyleSheet("color: #64748b; font-size: 12px;")
             legend_row.addWidget(dot)
             legend_row.addWidget(lbl)
         legend_row.addStretch()
@@ -95,7 +95,7 @@ class TestProgressPage(QWidget):
 
         # Status bar
         self.lbl_stat = QLabel("대기 중...")
-        self.lbl_stat.setStyleSheet("color: #6c7086; font-size: 12px;")
+        self.lbl_stat.setStyleSheet("color: #64748b; font-size: 12px;")
         layout.addWidget(self.lbl_stat)
 
     def _build_table(self):
@@ -114,7 +114,7 @@ class TestProgressPage(QWidget):
 
         for row, script in enumerate(self.scripts):
             script_item = QTableWidgetItem(script)
-            script_item.setForeground(QColor("#cdd6f4"))
+            script_item.setForeground(QColor("#1e293b"))
             self.table.setItem(row, 0, script_item)
 
             for col, dev_id in enumerate(self.devices, start=1):
@@ -145,8 +145,8 @@ class TestProgressPage(QWidget):
 
                 cell = self.cells.get((dev_id, script))
                 if cell:
-                    bg = CELL_BG.get(status, "#45475a")
-                    fg = CELL_FG.get(status, "#cdd6f4")
+                    bg = CELL_BG.get(status, "#f1f5f9")
+                    fg = CELL_FG.get(status, "#1e293b")
                     if cell.text() != status:
                         cell.setText(status)
                         cell.setBackground(QColor(bg))

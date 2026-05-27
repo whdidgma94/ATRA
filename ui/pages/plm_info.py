@@ -47,7 +47,7 @@ class PLMInfoPage(QWidget):
         layout.addWidget(title)
 
         desc = QLabel("미확인 Fail 항목의 PLM 사례코드와 제목을 입력해 주세요.")
-        desc.setStyleSheet("color: #6c7086; font-size: 13px;")
+        desc.setStyleSheet("color: #64748b; font-size: 13px;")
         layout.addWidget(desc)
 
         # Scrollable content area
@@ -80,7 +80,7 @@ class PLMInfoPage(QWidget):
             # OS section header
             os_header = QLabel(f"  {category}")
             os_header.setStyleSheet(
-                "background-color: #cba6f7; color: #1e1e2e; "
+                "background-color: #2563eb; color: #ffffff; "
                 "font-size: 13px; font-weight: 700; "
                 "border-radius: 6px; padding: 6px 12px;"
             )
@@ -95,7 +95,7 @@ class PLMInfoPage(QWidget):
 
             if not has_entry:
                 no_fail = QLabel("  문제점이 없습니다")
-                no_fail.setStyleSheet("color: #6c7086; padding: 8px 14px;")
+                no_fail.setStyleSheet("color: #64748b; padding: 8px 14px;")
                 self.content_layout.addWidget(no_fail)
 
         self.content_layout.addStretch()
@@ -108,11 +108,11 @@ class PLMInfoPage(QWidget):
         card_layout.setSpacing(16)
 
         # Left: info
-        color = STATUS_COLORS.get(item_data["status"], "#cdd6f4")
+        color = STATUS_COLORS.get(item_data["status"], "#1e293b")
         info_text = (
             f"<b style='color:{color}'>{item_data['name']}</b><br>"
             f"<span style='color:{color}'>{item_data['status']}</span><br>"
-            f"<span style='color:#a6adc8'>{item_data.get('content','')}</span>"
+            f"<span style='color:#64748b'>{item_data.get('content','')}</span>"
         )
         lbl_info = QLabel(info_text)
         lbl_info.setTextFormat(Qt.TextFormat.RichText)

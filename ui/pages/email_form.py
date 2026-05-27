@@ -32,7 +32,7 @@ class EmailFormPage(QWidget):
 
         desc = QLabel("발신 정보와 버전 정보를 입력하면 이메일 제목과 본문 HTML을 클립보드에 복사합니다.")
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #6c7086; font-size: 13px;")
+        desc.setStyleSheet("color: #64748b; font-size: 13px;")
         layout.addWidget(desc)
 
         layout.addSpacing(10)

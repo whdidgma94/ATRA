@@ -21,7 +21,7 @@ class ScreenshotDialog(QDialog):
     def __init__(self, b64_data, parent=None):
         super().__init__(parent)
         self.setWindowTitle("스크린샷")
-        self.setStyleSheet("background-color: #1e1e2e;")
+        self.setStyleSheet("background-color: #ffffff;")
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
 
@@ -96,7 +96,7 @@ class FailReviewerPage(QWidget):
         top.addStretch()
 
         os_lbl = QLabel("OS:")
-        os_lbl.setStyleSheet("color: #6c7086;")
+        os_lbl.setStyleSheet("color: #64748b;")
         top.addWidget(os_lbl)
         self.combo_os = QComboBox()
         self.combo_os.setMinimumWidth(130)
@@ -167,7 +167,7 @@ class FailReviewerPage(QWidget):
         self._field_widgets = {}
         for row, (label_text, key) in enumerate(FIELDS):
             lbl = QLabel(label_text)
-            lbl.setStyleSheet("color: #a6adc8; font-size: 12px; font-weight: 700;")
+            lbl.setStyleSheet("color: #475569; font-size: 12px; font-weight: 700;")
             lbl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
             grid.addWidget(lbl, row, 0)
 
@@ -246,10 +246,10 @@ class FailReviewerPage(QWidget):
         self.chk_pass.blockSignals(False)
 
         # Status color
-        color = STATUS_COLORS.get(status, "#cdd6f4")
+        color = STATUS_COLORS.get(status, "#1e293b")
 
         self._field_widgets["name"].setText(tc_id)
-        self._field_widgets["name"].setStyleSheet(f"color: #cdd6f4; font-weight: 700;")
+        self._field_widgets["name"].setStyleSheet("color: #1e293b; font-weight: 700;")
 
         status_lbl = self._field_widgets["status"]
         status_lbl.setText(status)

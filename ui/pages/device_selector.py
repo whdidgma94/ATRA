@@ -46,7 +46,7 @@ class DeviceSelectorPage(QWidget):
 
         desc = QLabel("ADB로 연결된 기기가 자동으로 표시됩니다. 테스트를 시작하면 연결된 모든 기기에서 병렬로 실행됩니다.")
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #6c7086; font-size: 13px;")
+        desc.setStyleSheet("color: #64748b; font-size: 13px;")
         layout.addWidget(desc)
 
         # Device tree
@@ -62,7 +62,7 @@ class DeviceSelectorPage(QWidget):
 
         # Status label
         self.lbl_status = QLabel("기기를 검색 중...")
-        self.lbl_status.setStyleSheet("color: #6c7086; font-size: 12px;")
+        self.lbl_status.setStyleSheet("color: #64748b; font-size: 12px;")
         layout.addWidget(self.lbl_status)
 
         # ── 로그 저장 경로 ──
@@ -73,7 +73,7 @@ class DeviceSelectorPage(QWidget):
         path_layout.setSpacing(8)
 
         path_title = QLabel("로그 저장 경로")
-        path_title.setStyleSheet("color: #a6adc8; font-size: 12px; font-weight: 700;")
+        path_title.setStyleSheet("color: #475569; font-size: 12px; font-weight: 700;")
         path_layout.addWidget(path_title)
 
         path_row = QHBoxLayout()
@@ -82,8 +82,9 @@ class DeviceSelectorPage(QWidget):
         self.lbl_path = QLabel(cv.base_log_path)
         self.lbl_path.setWordWrap(False)
         self.lbl_path.setStyleSheet(
-            "color: #cdd6f4; font-size: 12px; "
-            "background-color: #313244; border-radius: 6px; padding: 6px 10px;"
+            "color: #334155; font-size: 12px; "
+            "background-color: #f1f5f9; border: 1px solid #e2e8f0; "
+            "border-radius: 6px; padding: 6px 10px;"
         )
         self.lbl_path.setMinimumHeight(32)
         path_row.addWidget(self.lbl_path, stretch=1)
