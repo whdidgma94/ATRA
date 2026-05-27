@@ -7,8 +7,9 @@ from PyQt6.QtWidgets import (
     QComboBox, QCheckBox, QScrollArea, QFrame, QTextEdit,
     QMessageBox, QDialog, QSizePolicy, QGridLayout
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap, QColor
+from PyQt6.QtWidgets import QApplication
 
 import config.common_variable as cv
 from ui.theme import STATUS_COLORS
@@ -303,10 +304,8 @@ class FailReviewerPage(QWidget):
             return
         text = items[self.current_index].get("content", "")
         if text:
-            QApplication = __import__("PyQt6.QtWidgets", fromlist=["QApplication"]).QApplication
             QApplication.clipboard().setText(text)
             self.btn_copy.setText("✅")
-            QTimer = __import__("PyQt6.QtCore", fromlist=["QTimer"]).QTimer
             QTimer.singleShot(2000, lambda: self.btn_copy.setText("복사"))
 
     def _open_screenshot(self):
@@ -325,6 +324,9 @@ class FailReviewerPage(QWidget):
         )
         if not os.path.exists(video_path):
             QMessageBox.critical(self, "파일 없음", f"영상 파일을 찾을 수 없습니다.\n{video_path}")
+            return
+        if not hasattr(os, "startfile"):
+            QMessageBox.critical(self, "에러", "이 환경에서는 영상을 직접 열 수 없습니다.")
             return
         try:
             os.startfile(video_path)
