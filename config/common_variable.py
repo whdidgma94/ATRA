@@ -3,10 +3,13 @@ import sys
 from datetime import datetime
 
 username = os.getlogin()
-log_path=f"//10.254.245.50/sqe2_2/■ SmartThings/자동화 ST/00. TEST_LOG/BVT/ATRA_{datetime.now().strftime('%m%d')}"
-base_log_path=f"//10.254.245.50/sqe2_2/■ SmartThings/자동화 ST/00. TEST_LOG/BVT/ATRA_{datetime.now().strftime('%m%d')}"
-# log_path=f"C:\\Users\\{username}\\Desktop\\ATRA_{datetime.now().strftime('%m%d')}"
-# base_log_path=f"C:\\Users\\{username}\\Desktop\\ATRA_{datetime.now().strftime('%m%d')}"
+_NAS_BASE = os.environ.get(
+    "ATRA_LOG_BASE",
+    "//10.254.245.50/sqe2_2/■ SmartThings/자동화 ST/00. TEST_LOG/BVT"
+)
+_date_suffix = datetime.now().strftime('%m%d')
+log_path = f"{_NAS_BASE}/ATRA_{_date_suffix}"
+base_log_path = f"{_NAS_BASE}/ATRA_{_date_suffix}"
 os_version_dic = {"11" : "ROS", "12" : "SOS", "13" : "TOS", "14" : "UOS", "15" : "VOS", "16" : "BOS", "17" : "COS"}
 tcid = ""
 device_model_map = {}
