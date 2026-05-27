@@ -81,7 +81,7 @@ class DeviceSelectorPage(QWidget):
 
         self.lbl_path = QLabel(cv.base_log_path)
         self.lbl_path.setWordWrap(False)
-        self.lbl_path.setFixedHeight(38)
+        self.lbl_path.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.lbl_path.setStyleSheet(
             "color: #334155; font-size: 12px; "
             "background-color: #f1f5f9; border: 1px solid #e2e8f0; "
