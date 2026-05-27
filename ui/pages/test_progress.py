@@ -1,13 +1,40 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QFrame, QScrollArea
+    QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox, QFrame, QScrollArea,
+    QStyledItemDelegate
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QColor, QFont
+from PyQt6.QtGui import QColor, QFont, QBrush
 
 from ui.theme import CELL_BG, CELL_FG
 
 _POLL_MS = 500
+
+
+class _CellDelegate(QStyledItemDelegate):
+    """Bypasses QSS override so per-cell Background/Foreground roles are respected."""
+
+    def paint(self, painter, option, index):
+        bg = index.data(Qt.ItemDataRole.BackgroundRole)
+        fg = index.data(Qt.ItemDataRole.ForegroundRole)
+
+        # Column 0 (script name) has no background set — use default QSS rendering
+        if not bg or (isinstance(bg, QBrush) and not bg.color().isValid()):
+            super().paint(painter, option, index)
+            return
+
+        painter.save()
+        painter.fillRect(option.rect, bg if isinstance(bg, QBrush) else QBrush(bg))
+
+        text = index.data(Qt.ItemDataRole.DisplayRole) or ""
+        if fg:
+            painter.setPen(fg.color() if isinstance(fg, QBrush) else fg)
+        painter.drawText(
+            option.rect,
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter,
+            text,
+        )
+        painter.restore()
 
 
 class TestProgressPage(QWidget):
@@ -90,6 +117,7 @@ class TestProgressPage(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.setItemDelegate(_CellDelegate(self.table))
         scroll.setWidget(self.table)
         layout.addWidget(scroll)
 

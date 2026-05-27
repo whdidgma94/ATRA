@@ -120,7 +120,6 @@ QTableWidget {
 QTableWidget::item {
     padding: 6px 10px;
     border: none;
-    color: #1e293b;
     text-align: center;
 }
 QTableWidget::item:selected {
