@@ -9,6 +9,7 @@ import api.actions
 from email_feature.email_controller import process_email_form
 from report.report_controller import process_test_report
 
+# 구형 TC 스크립트의 `import main` 호환성 유지를 위해 api.actions를 main으로 등록
 sys.modules['main'] = api.actions
 # ==========================================
 # 2. 분리된 내부 모듈들 Import
@@ -96,9 +97,7 @@ def analyze_existing_logs(selected_log_path):
 
 
 def maintenance_script():
-
-
-    return
+    raise NotImplementedError("스크립트 유지보수 기능은 아직 구현되지 않았습니다.")
 
 
 def main():

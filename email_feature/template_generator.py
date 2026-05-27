@@ -24,4 +24,3 @@ def generate_title(release_ver: str, application_ver: str):
 
     return f"[진행결과][SVT][{release_ver}][{application_ver}] Android Build Verification Test 진행 결과 ({datetime.now().strftime('%m/%d')})"
 
-print(generate_title("2026 R1.2", "1.8.45.17 RC2"))
