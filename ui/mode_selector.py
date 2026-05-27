@@ -62,7 +62,7 @@ class ExecutionModeSelector:
 
     def select_mode_2(self):
         selected_dir = filedialog.askdirectory(title="리포트를 생성할 기존 로그 폴더를 선택하세요")
-        if os.path.exists(f"{selected_dir}/test_result.html"):
+        if os.path.exists(os.path.join(selected_dir, "test_result.html")):
             if not messagebox.askokcancel("리포트 삭제 주의 알림", "기존 리포트가 삭제됩니다. 그대로 진행하시겠습니까?"):
                 return
         if selected_dir:

@@ -1,7 +1,9 @@
+import os
 import customtkinter as tk
 from tkinter import ttk, messagebox
 import subprocess
 import config.common_variable as cv
+
 
 class ADBMonitorApp:
     def __init__(self, root):
@@ -38,7 +40,6 @@ class ADBMonitorApp:
 
         self.tree.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # 버튼 영역
         btn_frame = tk.CTkFrame(self.root)
         btn_frame.pack(pady=10)
 
@@ -49,12 +50,16 @@ class ADBMonitorApp:
                               fg_color="#4a90e2")
         check_btn.pack()
 
+    @staticmethod
+    def _major_version(version_str):
+        part = version_str.split(".")[0]
+        return int(part) if part.isdigit() else 99
 
     def on_check_button_click(self):
         collected_data = []
         for serial, info in self.device_cache.items():
             if info['status'] == 'device':
-                collected_data.append((serial,info['version']))
+                collected_data.append((serial, info['version']))
 
         if not collected_data:
             messagebox.showwarning("경고", "연결된 기기가 없습니다.")
@@ -63,16 +68,19 @@ class ADBMonitorApp:
         for serial, version in collected_data:
             version_key = version.split(".")[0]
             os_name = cv.os_version_dic.get(version_key, version_key)
-            model = self. device_cache.get(serial, {}).get('model', 'Unknown')
+            model = self.device_cache.get(serial, {}).get('model', 'Unknown')
             cv.device_model_map[os_name] = model
         self.root.destroy()
 
     @staticmethod
     def run_adb_command(command):
         try:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, startupinfo=startupinfo).decode('utf-8').strip()
+            kwargs = {}
+            if os.name == "nt":
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                kwargs["startupinfo"] = si
+            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, **kwargs).decode('utf-8').strip()
             return output
         except (Exception,):
             return None
@@ -94,7 +102,8 @@ class ADBMonitorApp:
             lines = raw_output.split('\n')[1:]
             current_serials = []
             for line in lines:
-                if not line.strip(): continue
+                if not line.strip():
+                    continue
                 parts = line.split()
                 serial, status = parts[0], parts[1]
                 current_serials.append(serial)
@@ -120,14 +129,13 @@ class ADBMonitorApp:
             self.tree.delete(item)
         sorted_cache = sorted(
             self.device_cache.items(),
-            key=lambda x: int(x[1]['version'].split(".")[0]) if x[1]['version'].split(".")[0].isdigit() else 99
+            key=lambda x: self._major_version(x[1]['version'])
         )
         for serial, info in sorted_cache:
             self.tree.insert("", "end", values=(serial, info['model'], info['version'], info['status']))
 
     def start_monitoring(self):
         self.refresh_device_list()
-
 
 
 def get_connected_devices_gui():

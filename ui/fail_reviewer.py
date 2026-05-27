@@ -9,9 +9,14 @@ from tkinter import messagebox
 
 import config.common_variable as cv
 
-# CustomTkinter 테마 설정
-ctk.set_appearance_mode("System")  # "System", "Dark", "Light"
-# ctk.set_default_color_theme("blue")
+ctk.set_appearance_mode("System")
+
+_STATUS_COLORS = {
+    "FAIL": "#FF4C4C",
+    "Minor_Fail": "#FF8C00",
+    "N/A": "#808080",
+    "Error": "#FFA500"
+}
 
 
 
@@ -159,7 +164,7 @@ class MultiCategoryFailViewer:
         self.btn_screenshot = ctk.CTkButton(self.media_button_frame, text="📹 영상 확인", command=self.open_video, fg_color="#1E90FF", hover_color="#1873CC", height=40)
         self.btn_screenshot.pack(side="left", expand=True, fill="x", padx=(5, 0))
 
-    def toggle_check_from_frame(self):
+    def toggle_check_from_frame(self, event=None):
         current_var = self.check_vars[self.current_category][self.current_index]
         current_var.set(not current_var.get())
 
@@ -220,13 +225,7 @@ class MultiCategoryFailViewer:
         self.display_labels['name'].configure(text=tc_id)
 
         # 상태별 색상 적용
-        status_colors = {
-            "FAIL": "#FF4C4C",
-            "Minor_Fail": "#FF8C00",
-            "N/A": "#808080",
-            "Error": "#FFA500"
-        }
-        color = status_colors.get(status, "white")
+        color = _STATUS_COLORS.get(status, "white")
 
         self.display_labels['status'].configure(text=status, text_color=color)
         content_widget = self.display_labels['content']
