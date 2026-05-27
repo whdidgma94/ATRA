@@ -32,15 +32,50 @@ def get_testcases():
 
 
 def run_device_process(udid1, port1, os_ver, log_direction, shared_dic):
-    BASE_PORT = 4723
     start_appium_server(port1)
-    system_port = 8201 + (port1 - BASE_PORT) // 2
-    wd = get_wd(udid1, port1,os_version_dic[os_ver], log_direction,system_port=system_port)
+    system_port = 8201 + (port1 - 4723) // 2
+    wd = get_wd(udid1, port1, os_version_dic[os_ver], log_direction, system_port=system_port)
     try:
         run_test(wd, os_version_dic[os_ver], log_direction, shared_dic)
     finally:
         wd.quit()
 
+
+def _save_recording(wd, os_ver, output_dir):
+    time.sleep(2)
+    video_raw_data = wd.stop_recording_screen()
+    video_data = base64.b64decode(video_raw_data)
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    video_path = os.path.join(output_dir, 'original_recording.mp4')
+    compress_path = os.path.join(output_dir, 'recording.mp4')
+
+    for path in (video_path, compress_path):
+        if os.path.exists(path):
+            os.remove(path)
+
+    with open(video_path, 'wb') as video_file:
+        video_file.write(video_data)
+
+    time.sleep(1)
+    try:
+        creationflags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+        subprocess.run(
+            ['ffmpeg', '-i', video_path, '-r', '30', '-c:v', 'libx264', '-crf', '35', '-an', compress_path],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=creationflags
+        )
+        os.remove(video_path)
+    except Exception:
+        print(f"{os_ver} 동영상 압축 중 오류 발생")
+        try:
+            os.remove(compress_path)
+        except Exception:
+            pass
 
 
 def run_test(wd, os_ver, log_direction, shared_dic):
@@ -63,8 +98,8 @@ def run_test(wd, os_ver, log_direction, shared_dic):
         file_path = ""
         for root1, _, dir1 in os.walk(testcases_path):
             for tcid in dir1:
-                if tcid == script+".py":
-                    file_path = root1+"\\"+tcid
+                if tcid == script + ".py":
+                    file_path = os.path.join(root1, tcid)
 
         common_variable.tcid = script
         print(f"{os_ver} 실행 중 : {common_variable.tcid}")
@@ -94,55 +129,15 @@ def run_test(wd, os_ver, log_direction, shared_dic):
         finally:
             try:
                 printl(datetime.now().strftime('%m/%d %H:%M'))
-                time.sleep(2)
-                video_raw_data = wd.stop_recording_screen()
-                video_data = base64.b64decode(video_raw_data)
                 output_dir = f'{common_variable.log_path}/{common_variable.tcid}'
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-                video_path = os.path.join(output_dir, 'original_recording.mp4')
-                if os.path.exists(video_path):
-                    os.remove(video_path)
-                compress_path = os.path.join(output_dir, 'recording.mp4')
-                if os.path.exists(compress_path):
-                    os.remove(compress_path)
-                with open(video_path, 'wb') as video_file:
-                    video_file.write(video_data)
-                time.sleep(1)
-                try:
-                    if os.name =='nt':
-                        creationflags = subprocess.CREATE_NO_WINDOW
-                    else:
-                        creationflags = 0
-                    subprocess.run(
-                        [
-                            'ffmpeg',
-                            '-i', video_path,
-                            '-r', '30',
-                            '-c:v', 'libx264',
-                            '-crf', '35',
-                            '-an',
-                            compress_path
-                        ],
-                        check=True,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                        creationflags=creationflags
-                    )
-                    os.remove(video_path)
-                except (Exception,):
-                    print(f"{os_ver} 동영상 압축 중 오류 발생")
-                    try:
-                        os.remove(compress_path)
-                    except (Exception,):
-                        pass
-                find("android:id/aerr_close",True, ex=True)
+                _save_recording(wd, os_ver, output_dir)
+                find("android:id/aerr_close", True, ex=True)
                 if common_variable.tcid == "Basic_function_Checklist_1080":
                     wd.press_keycode(4)
                     wd.press_keycode(4)
                     wd.press_keycode(4)
                 common_variable.defect = False
-            except (Exception,):
+            except Exception:
                 pass
         current_state[script] = result
         shared_dic[os_ver] = current_state
