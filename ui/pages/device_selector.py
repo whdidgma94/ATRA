@@ -83,9 +83,9 @@ class DeviceSelectorPage(QWidget):
         self.lbl_path.setWordWrap(False)
         self.lbl_path.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.lbl_path.setStyleSheet(
-            "color: #334155; font-size: 12px; "
+            "color: #334155; font-size: 13px; "
             "background-color: #f1f5f9; border: 1px solid #e2e8f0; "
-            "border-radius: 6px; padding: 6px 10px;"
+            "border-radius: 8px; padding: 10px 14px;"
         )
         self.lbl_path.setFixedHeight(38)
         path_row.addWidget(self.lbl_path, stretch=1)
