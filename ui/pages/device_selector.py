@@ -81,17 +81,17 @@ class DeviceSelectorPage(QWidget):
 
         self.lbl_path = QLabel(cv.base_log_path)
         self.lbl_path.setWordWrap(False)
+        self.lbl_path.setFixedHeight(38)
         self.lbl_path.setStyleSheet(
             "color: #334155; font-size: 12px; "
             "background-color: #f1f5f9; border: 1px solid #e2e8f0; "
             "border-radius: 6px; padding: 6px 10px;"
         )
-        self.lbl_path.setMinimumHeight(32)
         path_row.addWidget(self.lbl_path, stretch=1)
 
         btn_change = QPushButton("변경...")
         btn_change.setObjectName("secondaryBtn")
-        btn_change.setFixedSize(80, 34)
+        btn_change.setFixedSize(110, 38)
         btn_change.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_change.clicked.connect(self._change_log_path)
         path_row.addWidget(btn_change)
