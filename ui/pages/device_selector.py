@@ -1,9 +1,11 @@
 import os
 import subprocess
+from datetime import datetime
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTreeWidget, QTreeWidgetItem, QMessageBox, QFrame
+    QTreeWidget, QTreeWidgetItem, QMessageBox, QFrame, QLineEdit,
+    QFileDialog
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor
@@ -22,11 +24,15 @@ class DeviceSelectorPage(QWidget):
         self._setup_ui()
 
     def start_monitoring(self):
+        # 화면에 진입할 때마다 현재 cv 값으로 경로 표시 갱신
+        self.lbl_path.setText(cv.base_log_path)
         self._refresh_devices()
         self.timer.start(2000)
 
     def stop_monitoring(self):
         self.timer.stop()
+
+    # ── UI ────────────────────────────────────────────────────────────────────
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -59,7 +65,45 @@ class DeviceSelectorPage(QWidget):
         self.lbl_status.setStyleSheet("color: #6c7086; font-size: 12px;")
         layout.addWidget(self.lbl_status)
 
-        # Button
+        # ── 로그 저장 경로 ──
+        path_card = QFrame()
+        path_card.setObjectName("infoCard")
+        path_layout = QVBoxLayout(path_card)
+        path_layout.setContentsMargins(16, 12, 16, 12)
+        path_layout.setSpacing(8)
+
+        path_title = QLabel("로그 저장 경로")
+        path_title.setStyleSheet("color: #a6adc8; font-size: 12px; font-weight: 700;")
+        path_layout.addWidget(path_title)
+
+        path_row = QHBoxLayout()
+        path_row.setSpacing(10)
+
+        self.lbl_path = QLabel(cv.base_log_path)
+        self.lbl_path.setWordWrap(False)
+        self.lbl_path.setStyleSheet(
+            "color: #cdd6f4; font-size: 12px; "
+            "background-color: #313244; border-radius: 6px; padding: 6px 10px;"
+        )
+        self.lbl_path.setMinimumHeight(32)
+        path_row.addWidget(self.lbl_path, stretch=1)
+
+        btn_change = QPushButton("변경...")
+        btn_change.setObjectName("secondaryBtn")
+        btn_change.setFixedSize(80, 34)
+        btn_change.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_change.clicked.connect(self._change_log_path)
+        path_row.addWidget(btn_change)
+
+        path_layout.addLayout(path_row)
+
+        self.lbl_path_warn = QLabel("")
+        self.lbl_path_warn.setStyleSheet("color: #f38ba8; font-size: 11px;")
+        path_layout.addWidget(self.lbl_path_warn)
+
+        layout.addWidget(path_card)
+
+        # Start button
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         self.btn_start = QPushButton("자동화 테스트 구동 시작")
@@ -68,6 +112,25 @@ class DeviceSelectorPage(QWidget):
         self.btn_start.clicked.connect(self._on_start_clicked)
         btn_layout.addWidget(self.btn_start)
         layout.addLayout(btn_layout)
+
+    # ── Log path change ───────────────────────────────────────────────────────
+
+    def _change_log_path(self):
+        folder = QFileDialog.getExistingDirectory(
+            self, "로그를 저장할 기본 폴더를 선택하세요"
+        )
+        if not folder:
+            return
+
+        date_suffix = datetime.now().strftime("%m%d")
+        new_base = f"{folder}/ATRA_{date_suffix}"
+
+        cv.base_log_path = new_base
+        cv.log_path = new_base
+        self.lbl_path.setText(new_base)
+        self.lbl_path_warn.setText("")
+
+    # ── ADB helpers ───────────────────────────────────────────────────────────
 
     @staticmethod
     def _run_adb(command):
@@ -90,6 +153,8 @@ class DeviceSelectorPage(QWidget):
             "model": model or "Unknown",
             "version": version or "?",
         }
+
+    # ── Device polling ────────────────────────────────────────────────────────
 
     def _refresh_devices(self):
         raw = self._run_adb("adb devices")
@@ -155,6 +220,8 @@ class DeviceSelectorPage(QWidget):
         count = sum(1 for v in self.device_cache.values() if v["status"] == "device")
         self.lbl_status.setText(f"연결된 기기: {count}대")
 
+    # ── Start ─────────────────────────────────────────────────────────────────
+
     def _on_start_clicked(self):
         collected = [
             (serial, info["version"])
@@ -164,6 +231,22 @@ class DeviceSelectorPage(QWidget):
         if not collected:
             QMessageBox.warning(self, "경고", "연결된 기기가 없습니다.")
             return
+
+        # 경로 접근 가능 여부 사전 확인
+        parent = os.path.dirname(cv.base_log_path)
+        if parent and not os.path.exists(parent):
+            self.lbl_path_warn.setText(
+                f"⚠  경로에 접근할 수 없습니다. '변경...' 버튼으로 로컬 경로를 선택해 주세요."
+            )
+            QMessageBox.warning(
+                self, "경로 접근 불가",
+                f"로그 저장 경로에 접근할 수 없습니다.\n\n"
+                f"경로: {cv.base_log_path}\n\n"
+                f"'변경...' 버튼을 눌러 로컬 경로로 변경해 주세요."
+            )
+            return
+
+        self.lbl_path_warn.setText("")
 
         for serial, version in collected:
             version_key = version.split(".")[0]

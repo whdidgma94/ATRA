@@ -82,6 +82,9 @@ class AppWindow(QMainWindow):
     def _on_devices_confirmed(self, device_list: list):
         self.device_list = device_list
         self.log_dir = self._setup_log_directory()
+        if not self.log_dir:
+            # 경로 생성 실패 — 오류 메시지는 _setup_log_directory에서 이미 표시
+            return
 
         from core.test_runner import get_testcases, run_device_process
         from config.common_variable import os_version_dic
@@ -124,17 +127,28 @@ class AppWindow(QMainWindow):
     @staticmethod
     def _setup_log_directory() -> str:
         base = cv.base_log_path
-        if not os.path.exists(base):
-            os.makedirs(base)
+        try:
+            if not os.path.exists(base):
+                os.makedirs(base)
+                return base
+            for num in range(100):
+                new_path = f"{base}_{num + 2}"
+                if not os.path.exists(new_path):
+                    cv.base_log_path = new_path
+                    cv.log_path = f"{cv.log_path}_{num + 2}"
+                    os.makedirs(new_path)
+                    return new_path
             return base
-        for num in range(100):
-            new_path = f"{base}_{num + 2}"
-            if not os.path.exists(new_path):
-                cv.base_log_path = new_path
-                cv.log_path = f"{cv.log_path}_{num + 2}"
-                os.makedirs(new_path)
-                return new_path
-        return base
+        except OSError as e:
+            from PyQt6.QtWidgets import QMessageBox
+            QMessageBox.critical(
+                None, "로그 경로 생성 실패",
+                f"로그 저장 폴더를 만들 수 없습니다.\n\n"
+                f"경로: {base}\n"
+                f"오류: {e}\n\n"
+                f"기기 선택 화면의 '변경...' 버튼으로 로컬 경로를 선택해 주세요."
+            )
+            return ""
 
     # ── Test finished → parse logs ────────────────────────────────────────────
 
