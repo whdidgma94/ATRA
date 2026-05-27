@@ -87,6 +87,7 @@ class DeviceSelectorPage(QWidget):
             "background-color: #f1f5f9; border: 1px solid #e2e8f0; "
             "border-radius: 6px; padding: 6px 10px;"
         )
+        self.lbl_path.setFixedHeight(38)
         path_row.addWidget(self.lbl_path, stretch=1)
 
         btn_change = QPushButton("변경...")
