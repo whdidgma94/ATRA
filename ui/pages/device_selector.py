@@ -119,7 +119,13 @@ class DeviceSelectorPage(QWidget):
                 else:
                     self.device_cache[serial] = {"model": "-", "version": "-", "status": status}
             else:
+                prev_status = self.device_cache[serial]["status"]
                 self.device_cache[serial]["status"] = status
+                # unauthorized → device 전환 시 모델/버전 재조회
+                if status == "device" and prev_status != "device":
+                    detail = self._get_device_detail(serial)
+                    self.device_cache[serial]["model"] = detail["model"]
+                    self.device_cache[serial]["version"] = detail["version"]
 
         for s in [k for k in self.device_cache if k not in current_serials]:
             del self.device_cache[s]
