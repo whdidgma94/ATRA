@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.idea/
+
+# Build
+build/
+dist/
+*.spec
+*.egg-info/
+
+# Logs & reports
+*.html
+*.mp4
+*.zip
+*.png
