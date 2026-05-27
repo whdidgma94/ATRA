@@ -66,14 +66,14 @@ class TestProgressPage(QWidget):
         legend_row = QHBoxLayout()
         legend_row.setSpacing(16)
         for label, color in [
-            ("Pending", "#94a3b8"), ("Running", "#ca8a04"),
+            ("Pending", "#64748b"), ("Running", "#ca8a04"),
             ("Pass", "#16a34a"), ("Fail", "#dc2626"),
-            ("Error", "#d97706"), ("N/T", "#0891b2"), ("N/A", "#64748b"),
+            ("Error", "#d97706"), ("N/T", "#0891b2"), ("N/A", "#475569"),
         ]:
             dot = QLabel("●")
             dot.setStyleSheet(f"color: {color}; font-size: 16px;")
             lbl = QLabel(label)
-            lbl.setStyleSheet("color: #64748b; font-size: 12px;")
+            lbl.setStyleSheet("color: #475569; font-size: 12px;")
             legend_row.addWidget(dot)
             legend_row.addWidget(lbl)
         legend_row.addStretch()
@@ -95,7 +95,7 @@ class TestProgressPage(QWidget):
 
         # Status bar
         self.lbl_stat = QLabel("대기 중...")
-        self.lbl_stat.setStyleSheet("color: #64748b; font-size: 12px;")
+        self.lbl_stat.setStyleSheet("color: #475569; font-size: 12px;")
         layout.addWidget(self.lbl_stat)
 
     def _build_table(self):

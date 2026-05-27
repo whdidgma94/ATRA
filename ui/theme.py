@@ -19,7 +19,7 @@ QLabel#appTitle {
     letter-spacing: 6px;
 }
 QLabel#subtitle {
-    color: #94a3b8;
+    color: #475569;
     font-size: 13px;
     letter-spacing: 2px;
 }
@@ -37,7 +37,7 @@ QLabel#sectionBadge {
     font-weight: 700;
 }
 QLabel#counterLabel {
-    color: #64748b;
+    color: #475569;
     font-size: 14px;
 }
 
@@ -270,11 +270,11 @@ QMessageBox QLabel { color: #1e293b; }
 STATUS_COLORS = {
     "FAIL":       "#dc2626",
     "Minor_Fail": "#d97706",
-    "N/A":        "#64748b",
+    "N/A":        "#475569",
     "Error":      "#d97706",
     "Pass":       "#16a34a",
     "N/T":        "#0891b2",
-    "Pending":    "#94a3b8",
+    "Pending":    "#64748b",
     "Running":    "#ca8a04",
 }
 

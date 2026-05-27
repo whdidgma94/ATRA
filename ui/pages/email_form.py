@@ -6,6 +6,8 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 
 from email_feature.template_generator import generate_html, generate_title
 
+_LABEL_WIDTH = 150  # 공통 레이블 너비 — "SmartThings 버전" 등 긴 텍스트 수용
+
 
 class EmailFormPage(QWidget):
     def __init__(self):
@@ -32,7 +34,7 @@ class EmailFormPage(QWidget):
 
         desc = QLabel("발신 정보와 버전 정보를 입력하면 이메일 제목과 본문 HTML을 클립보드에 복사합니다.")
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #64748b; font-size: 13px;")
+        desc.setStyleSheet("color: #475569; font-size: 13px;")
         layout.addWidget(desc)
 
         layout.addSpacing(10)
@@ -44,9 +46,12 @@ class EmailFormPage(QWidget):
         card_layout.setContentsMargins(28, 24, 28, 24)
         card_layout.setSpacing(14)
 
-        # Row 1 — Name + rank
+        # Row 1 — Name + rank (레이블 너비를 _LABEL_WIDTH 로 통일)
         row1 = QHBoxLayout()
         row1.setSpacing(12)
+
+        lbl_sender = QLabel("발신자")
+        lbl_sender.setFixedWidth(_LABEL_WIDTH)
 
         self.entry_name = QLineEdit()
         self.entry_name.setPlaceholderText("이름 입력")
@@ -58,7 +63,7 @@ class EmailFormPage(QWidget):
         self.combo_rank.setCurrentText("선임")
         self.combo_rank.setFixedWidth(110)
 
-        row1.addWidget(QLabel("발신자"))
+        row1.addWidget(lbl_sender)
         row1.addWidget(self.entry_name)
         row1.addWidget(self.combo_rank)
         row1.addStretch()
@@ -93,7 +98,7 @@ class EmailFormPage(QWidget):
         # Status label
         self.lbl_status = QLabel("")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_status.setStyleSheet("color: #a6e3a1; font-size: 13px;")
+        self.lbl_status.setStyleSheet("color: #16a34a; font-size: 13px;")
         layout.addWidget(self.lbl_status)
 
         layout.addStretch()
@@ -102,7 +107,7 @@ class EmailFormPage(QWidget):
         row = QHBoxLayout()
         row.setSpacing(12)
         lbl = QLabel(label_text)
-        lbl.setFixedWidth(130)
+        lbl.setFixedWidth(_LABEL_WIDTH)
         entry = QLineEdit()
         entry.setPlaceholderText(placeholder)
         entry.setFixedWidth(width)
@@ -148,7 +153,7 @@ class EmailFormPage(QWidget):
         self._show_status("✅  이메일 본문 HTML이 클립보드에 복사되었습니다!")
 
     def _show_status(self, msg, error=False):
-        color = "#f38ba8" if error else "#a6e3a1"
+        color = "#dc2626" if error else "#16a34a"
         self.lbl_status.setStyleSheet(f"color: {color}; font-size: 13px;")
         self.lbl_status.setText(msg)
         QTimer.singleShot(3000, lambda: self.lbl_status.setText(""))

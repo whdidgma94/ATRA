@@ -46,15 +46,15 @@ class DeviceSelectorPage(QWidget):
 
         desc = QLabel("ADB로 연결된 기기가 자동으로 표시됩니다. 테스트를 시작하면 연결된 모든 기기에서 병렬로 실행됩니다.")
         desc.setWordWrap(True)
-        desc.setStyleSheet("color: #64748b; font-size: 13px;")
+        desc.setStyleSheet("color: #475569; font-size: 13px;")
         layout.addWidget(desc)
 
         # Device tree
         self.tree = QTreeWidget()
         self.tree.setHeaderLabels(["Serial Number", "Model", "Android Ver", "Status"])
         self.tree.setColumnWidth(0, 200)
-        self.tree.setColumnWidth(1, 220)
-        self.tree.setColumnWidth(2, 120)
+        self.tree.setColumnWidth(1, 240)
+        self.tree.setColumnWidth(2, 130)
         self.tree.setColumnWidth(3, 120)
         self.tree.setRootIsDecorated(False)
         self.tree.setAlternatingRowColors(False)
@@ -62,7 +62,7 @@ class DeviceSelectorPage(QWidget):
 
         # Status label
         self.lbl_status = QLabel("기기를 검색 중...")
-        self.lbl_status.setStyleSheet("color: #64748b; font-size: 12px;")
+        self.lbl_status.setStyleSheet("color: #475569; font-size: 12px;")
         layout.addWidget(self.lbl_status)
 
         # ── 로그 저장 경로 ──
@@ -73,7 +73,7 @@ class DeviceSelectorPage(QWidget):
         path_layout.setSpacing(8)
 
         path_title = QLabel("로그 저장 경로")
-        path_title.setStyleSheet("color: #475569; font-size: 12px; font-weight: 700;")
+        path_title.setStyleSheet("color: #334155; font-size: 12px; font-weight: 700;")
         path_layout.addWidget(path_title)
 
         path_row = QHBoxLayout()
@@ -99,7 +99,7 @@ class DeviceSelectorPage(QWidget):
         path_layout.addLayout(path_row)
 
         self.lbl_path_warn = QLabel("")
-        self.lbl_path_warn.setStyleSheet("color: #f38ba8; font-size: 11px;")
+        self.lbl_path_warn.setStyleSheet("color: #dc2626; font-size: 11px;")
         path_layout.addWidget(self.lbl_path_warn)
 
         layout.addWidget(path_card)
@@ -213,9 +213,9 @@ class DeviceSelectorPage(QWidget):
             item.setTextAlignment(2, Qt.AlignmentFlag.AlignCenter)
             item.setTextAlignment(3, Qt.AlignmentFlag.AlignCenter)
             if info["status"] == "device":
-                item.setForeground(3, QColor("#a6e3a1"))
+                item.setForeground(3, QColor("#16a34a"))
             else:
-                item.setForeground(3, QColor("#f38ba8"))
+                item.setForeground(3, QColor("#dc2626"))
             self.tree.addTopLevelItem(item)
 
         count = sum(1 for v in self.device_cache.values() if v["status"] == "device")

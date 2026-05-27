@@ -96,7 +96,7 @@ class FailReviewerPage(QWidget):
         top.addStretch()
 
         os_lbl = QLabel("OS:")
-        os_lbl.setStyleSheet("color: #64748b;")
+        os_lbl.setStyleSheet("color: #475569;")
         top.addWidget(os_lbl)
         self.combo_os = QComboBox()
         self.combo_os.setMinimumWidth(130)
@@ -147,7 +147,7 @@ class FailReviewerPage(QWidget):
 
         grid = QGridLayout()
         grid.setSpacing(8)
-        grid.setColumnMinimumWidth(0, 160)
+        grid.setColumnMinimumWidth(0, 185)
         grid.setColumnStretch(1, 1)
 
         FIELDS = [
@@ -167,14 +167,15 @@ class FailReviewerPage(QWidget):
         self._field_widgets = {}
         for row, (label_text, key) in enumerate(FIELDS):
             lbl = QLabel(label_text)
-            lbl.setStyleSheet("color: #475569; font-size: 12px; font-weight: 700;")
+            lbl.setStyleSheet("color: #334155; font-size: 12px; font-weight: 700;")
             lbl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
             grid.addWidget(lbl, row, 0)
 
             if key == "content":
                 widget = QTextEdit()
                 widget.setReadOnly(True)
-                widget.setFixedHeight(64)
+                widget.setMinimumHeight(80)
+                widget.setMaximumHeight(120)
                 widget.setStyleSheet("font-size: 13px;")
                 row_layout = QHBoxLayout()
                 row_layout.setSpacing(8)
