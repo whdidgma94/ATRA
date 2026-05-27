@@ -6,6 +6,7 @@ from PIL import Image
 
 Image.init()
 
+
 def get_screenshot_info(screenshot_path):
     if screenshot_path == "":
         return ""
@@ -24,9 +25,193 @@ def get_screenshot_info(screenshot_path):
         return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
 
+def _render_summary_rows(reviewed_results, total_result, comment_info, plm_info, device_info):
+    html = ""
+    for key, value in reviewed_results.items():
+        os_name = key.replace("OS", " OS").replace("_", "")
+        html += f"""
+            <tr style="font-size:15px;">
+                <td><button onclick="toggleVisibility(this, '{key}')" class="toggle-button">{os_name}</button>
+                Model name : {device_info.get(key, "")}</td>
+                <td>{value['total']}</td>
+                <td>{value['pass']}</td>
+                <td style="color: red">{value['fail']}</td>
+                <td style="color: gray">{value['na']}</td>
+                <td style="color: blue">{value['nt']}</td>
+                <td>{value['pass_rate']}%</td>
+                <td style="color: blue; font-size: 15px; text-align: left;">
+"""
+        if comment_info[key]["N/A"] != [] and comment_info.get(key):
+            html += """
+                    <div style="font-weight: bold;">#. N/A</div>
+"""
+            for comment in comment_info[key]["N/A"]:
+                html += f"<div>{comment}</div>"
+
+        if comment_info[key]["N/A"] != [] and comment_info[key]["N/T"] != []:
+            html += "<br></br>"
+
+        if comment_info[key]["N/T"] != [] and comment_info.get(key):
+            html += """
+                        <div style="font-weight: bold;">#. N/T</div>
+"""
+            for comment in comment_info[key]["N/T"]:
+                html += f"<div>{comment}</div>"
+
+        html += """
+            </td>
+"""
+        if plm_info and plm_info.get(key):
+            html += """
+                <td style="color: red; font-size: 15px; text-align: left;">
+                    <div style="font-weight: bold;">#. FAIL</div>
+"""
+            for issue_info in plm_info[key]:
+                html += f"<div>{issue_info}</div>"
+            html += "</td>"
+        else:
+            html += """
+                    <td style="color: red; font-size: 15px; text-align: left;">
+                        <div style="font-weight: bold;"></div>
+                        <div></div>
+                    </td>"""
+        html += "</tr>"
+
+    html += f"""
+            <tr style = "font-weight: bold; background-color: antiquewhite; font-size:20px;">
+                <td>Total</td>
+                <td>{total_result['total']}</td>
+                <td>{total_result['pass']}</td>
+                <td style="color: red">{total_result['fail']}</td>
+                <td style="color: gray">{total_result['na']}</td>
+                <td style="color: blue">{total_result['nt']}</td>
+                <td>{total_result['pass_rate']}%</td>
+                <td> </td>
+                <td> </td>
+            </tr>
+"""
+    return html
+
+
+def _render_detail_rows(reviewed_data):
+    html = ""
+    for key, value in reviewed_data.items():
+        tcid = ""
+        os_name = key.replace("OS", " OS").replace("_", "")
+        sorted_data = sorted(
+            value,
+            key=lambda x: (x['name'], 0 if x['status'] == 'FAIL' else 1)
+        )
+        for case in sorted_data:
+            is_reviewed = case.get("is_reviewed", False)
+            status = case['status']
+
+            if status == 'Pass':
+                row_color = "black"
+            elif status == 'FAIL':
+                row_color = "black" if is_reviewed else "red"
+            elif status == 'Minor_Fail':
+                row_color = "black" if is_reviewed else "coral"
+            elif status == 'N/T':
+                row_color = "blue"
+            elif status == 'N/A':
+                row_color = "black" if is_reviewed else "gray"
+            elif status == 'Error':
+                row_color = "black" if is_reviewed else "red"
+            else:
+                row_color = "black"
+
+            html += f"""
+                        <tr class="toggle-tr {key}" style="color: {row_color}; font-weight: bold;">
+"""
+            if tcid == "":
+                tcid = case['name']
+                html += f"""
+                                <td>{os_name}</td>
+                                <td>
+                                    <div class= "card" onclick="openTcModal(this.innerHTML)">{case['name']}</div>
+                                </td>
+"""
+            elif tcid == case['name']:
+                html += """
+                                <td></td>
+                                <td></td>
+"""
+            else:
+                tcid = case['name']
+                html += f"""
+                                <td>{os_name}</td>
+                                <td>
+                                    <div class= "card" onclick="openTcModal(this.innerHTML)">{case['name']}</div>
+                                </td>
+"""
+            html += f"""
+                                <td>{case['execution_time']}</td>
+"""
+            if status == "FAIL":
+                html += """
+                                    <td>TC Fail</td>
+"""
+            elif status == "Minor_Fail":
+                html += """
+                                    <td>추가시험 Fail</td>
+"""
+            elif status == "Error":
+                html += """
+                                    <td>Error</td>
+"""
+            else:
+                html += f"""
+                                    <td>{status}</td>
+"""
+            html += f"""
+                                <td>{case['content']}</td>
+                                <td>
+"""
+            if case['screenshot_file'] != "":
+                html += f"""
+                                    <div class="card" onclick="openModal(this.querySelector('img').src)">
+                                        <img src="data:image/webp;base64,{case['screenshot_file']}" alt="">
+                                    </div>
+"""
+            html += """
+                                </td>
+"""
+            if status in ("FAIL", "Minor_Fail", "N/A", "Error"):
+                if is_reviewed:
+                    html += """
+                                    <td style="color:black;">Pass</td>
+"""
+                else:
+                    retest_label = {"FAIL": "TC FAIL", "Minor_Fail": "추가시험 Fail", "N/A": "N/A", "Error": "TC FAIL"}
+                    html += f"""
+                                    <td>{retest_label.get(status, "")}</td>
+"""
+            else:
+                html += """
+                                <td></td>
+"""
+            try:
+                if case['plm_num'] == "":
+                    html += f"""
+                                    <td>{case['plm_title']}</td>
+"""
+                else:
+                    html += f"""
+                                    <td>[{case['plm_num']}] {case['plm_title']}</td>
+"""
+            except KeyError:
+                html += """
+                                <td></td>
+"""
+            html += """
+                            </tr>
+"""
+    return html
+
 
 def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_results: dict, plm_info: dict, test_case_data: dict, comment_info: dict, device_info: dict) -> str:
-    html_template = f"""
+    html_template = """
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -34,56 +219,56 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>자동화 테스트 결과 요약</title>
     <style>
-        body {{
+        body {
             font-family: 'Malgun Gothic', Arial, sans-serif;
             margin: 20px;
             background-color: #f5f5f5;
             justify-content: center;
             align-items:center;
-        }}
-        .container {{
+        }
+        .container {
             max-width: 1800px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }}
-        h1 {{
+        }
+        h1 {
             color: #333;
             text-align: center;
             margin-bottom: 30px;
-        }}
-        table {{
+        }
+        table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
             background-color: white;
-        }}
-        .result_table{{
+        }
+        .result_table{
             table-layout: fixed;
-        }}
-        th, td {{
+        }
+        th, td {
             border: 1px solid #ddd;
             padding: 12px;
             text-align: center;
-        }}
-        th {{
+        }
+        th {
             height: 21px;
             background-color: #4CAF50;
             color: white;
             font-weight: bold;
-        }}
-        .summary {{
+        }
+        .summary {
             width: 4%;
-        }}
-        tr:nth-child(even) {{
+        }
+        tr:nth-child(even) {
             background-color: #f9f9f9;
-        }}
-        tr:hover {{
+        }
+        tr:hover {
             background-color: #f5f5f5;
-        }}
-        .toggle-button{{
+        }
+        .toggle-button{
             font-size: 16px;
             font-weight: bold;
             padding: 12px 24px;
@@ -92,48 +277,48 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             background-color: #4CAF50;
             color: white;
             border-radius: 8px;
-        }}
-        .toggle-button:hover{{
+        }
+        .toggle-button:hover{
             background-color: #006400;
-        }}
-        .toggle-button.active{{
+        }
+        .toggle-button.active{
             background-color: #006400;
-        }}
-        .section-title {{
+        }
+        .section-title {
             font-size: 18px;
             font-weight: bold;
             color: #333;
             margin: 30px 0 15px 0;
             border-bottom: 2px solid #4CAF50;
             padding-bottom: 5px;
-        }}
-        .fail-case {{
+        }
+        .fail-case {
             text-align: left;
             white-space: nowrap;
             min-width: 300px;
-        }}
-        .toggle-tr {{
+        }
+        .toggle-tr {
             display: none;
-        }}
-        .visible-tr {{
+        }
+        .visible-tr {
             display: table-row;
-        }}
-        .card{{
+        }
+        .card{
             display: flex;
             justify-content: center;
             align-items:center;
             overflow:hidden;
             cursor:pointer;
-        }}
-        .card img{{
+        }
+        .card img{
             height: 50px;
             object-fit: cover;
             display: block;
-        }}
-        .card.expanded img{{
+        }
+        .card.expanded img{
             width: auto;
-        }}
-        .modal{{
+        }
+        .modal{
             display: none;
             position: fixed;
             z-index: 1000;
@@ -142,8 +327,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             width: 100%; height: 100%;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.5);
-        }}
-        .modal-content {{
+        }
+        .modal-content {
             margin: auto;
             display: block;
             height: 800px;
@@ -152,9 +337,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             animation-name: zoom;
             animation-duration: 0.3s;
             cursor: pointer;
-        }}
-        /* 닫기 버튼 (X) */
-        .close {{
+        }
+        .close {
             position: absolute;
             top: 15px;
             right: 35px;
@@ -163,18 +347,18 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             font-weight: bold;
             transition: 0.3s;
             cursor: pointer;
-        }}
-        .close:hover, .close:focus {{
+        }
+        .close:hover, .close:focus {
             color: #bbb;
             text-decoration: none;
             cursor: pointer;
-        }}
-        .divider-row td {{
+        }
+        .divider-row td {
             border-bottom: 0.5px solid #ddd;
             padding: 0px;
             height: 0px;
-        }}
-        .tcModal{{
+        }
+        .tcModal{
             display: none;
             position: fixed;
             z-index: 1000;
@@ -185,8 +369,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items:center;
-        }}
-        .tcModal-content {{
+        }
+        .tcModal-content {
             margin: auto;
             display: flex;
             border-radius: 5px;
@@ -194,14 +378,14 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             animation-name: zoom;
             animation-duration: 0.3s;
             cursor: pointer;
-        }}
-        pre {{
+        }
+        pre {
             font-family: 'Malgun Gothic', Arial, sans-serif;
             font-size: 13px;
             text-align: left;
             white-space: pre-wrap;
-        }}
-        .tcListModal{{
+        }
+        .tcListModal{
             display: none;
             position: fixed;
             z-index: 1000;
@@ -212,8 +396,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             flex-wrap: wrap;
-        }}
-        .tcListModal-content {{
+        }
+        .tcListModal-content {
             margin: auto;
             display: flex;
             border-radius: 5px;
@@ -221,7 +405,7 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             animation-name: zoom;
             animation-duration: 0.3s;
             cursor: pointer;
-        }}
+        }
     </style>
 </head>
 <body>
@@ -244,71 +428,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
         </thead>
         <tbody>
 """
-
-
-    # 1. OS별 결과 요약표 렌더링
-    for key, value in reviewed_results.items():
-        os_name = key.replace("OS", " OS").replace("_", "")
-
-        html_template += f"""
-            <tr style="font-size:15px;">
-                <td><button onclick="toggleVisibility(this, '{key}')" class="toggle-button">{os_name}</button>
-                Model name : {device_info.get(key, "")}</td>
-                <td>{value['total']}</td>
-                <td>{value['pass']}</td>
-                <td style="color: red">{value['fail']}</td>
-                <td style="color: gray">{value['na']}</td>
-                <td style="color: blue">{value['nt']}</td>
-                <td>{value['pass_rate']}%</td>
-                <td style="color: blue; font-size: 15px; text-align: left;">
-"""
-        if comment_info[key]["N/A"] != [] and comment_info.get(key):
-            html_template += f"""
-                    <div style="font-weight: bold;">#. N/A</div>
-"""
-            for comment in comment_info[key]["N/A"]:
-                    html_template += f"<div>{comment}</div>"
-
-        if comment_info[key]["N/A"] != [] and comment_info[key]["N/T"] != []:
-            html_template += f"<br></br>"
-
-        if comment_info[key]["N/T"] != [] and comment_info.get(key):
-            html_template += f"""
-                        <div style="font-weight: bold;">#. N/T</div>
-"""
-            for comment in comment_info[key]["N/T"]:
-                html_template += f"<div>{comment}</div>"
-
-        html_template += f"""
-            </td>
-"""
-        if plm_info and plm_info.get(key):
-            html_template += f"""
-                <td style="color: red; font-size: 15px; text-align: left;">
-                    <div style="font-weight: bold;">#. FAIL</div>
-"""
-            for issue_info in plm_info[key]:
-                html_template += f"<div>{issue_info}</div>"
-            html_template += "</td>"
-        else:
-            html_template += """
-                    <td style="color: red; font-size: 15px; text-align: left;">
-                        <div style="font-weight: bold;"></div>
-                        <div></div>
-                    </td>"""
-        html_template += "</tr>"
-    html_template += f"""
-            <tr style = "font-weight: bold; background-color: antiquewhite; font-size:20px;">
-                <td>Total</td>
-                <td>{total_result['total']}</td>
-                <td>{total_result['pass']}</td>
-                <td style="color: red">{total_result['fail']}</td>
-                <td style="color: gray">{total_result['na']}</td>
-                <td style="color: blue">{total_result['nt']}</td>
-                <td>{total_result['pass_rate']}%</td>
-                <td> </td>
-                <td> </td>
-            </tr>
+    html_template += _render_summary_rows(reviewed_results, total_result, comment_info, plm_info, device_info)
+    html_template += """
         </tbody>
     </table>
     <div class="section-title">Test Case 상세 정보</div>
@@ -329,156 +450,8 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
                 </tr>
             </thead>
             <tbody id="fail_case">
-    """
-
-    for key, value in reviewed_data.items():
-        tcid = ""
-        os_name = key.replace("OS", " OS")
-        os_name = os_name.replace("_", "")
-        sorted_data = sorted(
-            value,
-            key=lambda x: (x['name'], 0 if x['status'] == 'FAIL' else 1)
-        )
-        for case in sorted_data:
-            if case['status'] == 'Pass':
-                html_template += f"""
-                            <tr class="toggle-tr {key}" style="color: black; font-weight: bold;">
-    """
-            elif case['status'] == 'FAIL':
-                if case["is_reviewed"]:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: black; font-weight: bold;">
-    """
-                else:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: red; font-weight: bold;">
-    """
-            elif case['status'] == 'Minor_Fail':
-                if case["is_reviewed"]:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: black; font-weight: bold;">
-    """
-                else:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: coral; font-weight: bold;">
-    """
-            elif case['status'] == 'N/T':
-                html_template += f"""
-                            <tr class="toggle-tr {key}" style="color: blue; font-weight: bold;">
-    """
-            elif case['status'] == 'N/A':
-                if case["is_reviewed"]:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: black; font-weight: bold;">
-    """
-                else:
-                    html_template += f"""
-                            <tr class="toggle-tr {key}" style="color: gray; font-weight: bold;">
-    """
-            elif case['status'] == 'Error':
-                if case["is_reviewed"]:
-                    html_template += f"""
-                                <tr class="toggle-tr {key}" style="color: black; font-weight: bold;">
-    """
-                else:
-                    html_template += f"""
-                            <tr class="toggle-tr {key}" style="color: red; font-weight: bold;">
-    """
-            if tcid == "":
-                tcid = case['name']
-                html_template += f"""
-                                <td>{os_name}</td>
-                                <td>
-                                    <div class= "card" onclick="openTcModal(this.innerHTML)">{case['name']}</div>
-                                </td>
-    """
-            elif tcid == case['name']:
-                html_template += f"""
-                                <td></td>
-                                <td></td>
-    """
-            else:
-                tcid = case['name']
-                html_template += f"""
-                                <td>{os_name}</td>
-                                <td>
-                                    <div class= "card" onclick="openTcModal(this.innerHTML)">{case['name']}</div>
-                                </td>
-    """
-            html_template += f"""
-                                <td>{case['execution_time']}</td>
-    """
-            if case['status'] == "FAIL":
-                html_template += f"""
-                                    <td>TC Fail</td>
-    """
-            elif case['status'] == "Minor_Fail":
-                html_template += f"""
-                                    <td>추가시험 Fail</td>
-    """
-            elif case['status'] == "Error":
-                html_template += f"""
-                                    <td>Error</td>
-    """
-            else:
-                html_template += f"""
-                                    <td>{case['status']}</td>
-    """
-            html_template += f"""
-                                <td>{case['content']}</td>
-                                <td>
-    """
-            if case['screenshot_file'] != "":
-                html_template += f"""
-                                    <div class="card" onclick="openModal(this.querySelector('img').src)">
-                                        <img src="data:image/webp;base64,{case['screenshot_file']}" alt="">
-                                    </div>
-    """
-            html_template += f"""
-                                </td>
-    """
-            if case['status'] == "FAIL" or case['status'] == "Minor_Fail" or case['status'] == "N/A" or case['status'] == "Error":
-                if case["is_reviewed"]:
-                    html_template += f"""
-                                    <td style="color:black;">Pass</td>
-    """
-                else:
-                    if case['status'] == "FAIL":
-                        html_template += f"""
-                                    <td>TC FAIL</td>
-    """
-                    if case['status'] == "Minor_Fail":
-                        html_template += f"""
-                                    <td>추가시험 Fail</td>
-    """
-                    if case['status'] == "N/A":
-                        html_template += f"""
-                                    <td>N/A</td>
-    """
-                    if case['status'] == "Error":
-                        html_template += f"""
-                                    <td>TC FAIL</td>
-    """
-            else:
-                html_template += f"""
-                                <td></td>
-    """
-            try:
-                if case['plm_num'] == "":
-                    html_template += f"""
-                                    <td>{case['plm_title']}</td>
-    """
-                else:
-                    html_template += f"""
-                                    <td>[{case['plm_num']}] {case['plm_title']}</td>
-    """
-            except KeyError:
-                html_template += f"""
-                                <td></td>
-    """
-            html_template += f"""
-                            </tr>
-    """
+"""
+    html_template += _render_detail_rows(reviewed_data)
     html_template += """
                 </tbody>
             </table>
@@ -535,90 +508,85 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
                     </tr>
                 </thead>
                 <tbody>
-    """
+"""
     for key, value in test_case_data.items():
         html_template += f"""
                     <tr>
                         <td style="width: 200px;"><pre style="text-align: center;">{key}</pre></td>
-                        <td style="width: 60px;"><pre style="text-align: center;">{test_case_data[key]["middle_category"]}</pre></td>
-                        <td style="width: 60px;"><pre style="text-align: center;">{test_case_data[key]["small_category"]}</pre></td>
-                        <td style="width: 60px;"><pre style="text-align: center;">{test_case_data[key]["detail_function"]}</pre></td>
-                        <td style="width: 60px;"><pre>{test_case_data[key]["test_objectives"]}</pre></td>
-                        <td style="width: 60px;"><pre>{test_case_data[key]["input_specification"]}</pre></td>
-                        <td style="width: 100px;"><pre>{test_case_data[key]["pre_condition"]}</pre></td>
-                        <td style="width: 200px;"><pre>{test_case_data[key]["test_procedure"]}</pre></td>
-                        <td style="width: 200px;"><pre>{test_case_data[key]["expected_result"]}</pre></td>
+                        <td style="width: 60px;"><pre style="text-align: center;">{value["middle_category"]}</pre></td>
+                        <td style="width: 60px;"><pre style="text-align: center;">{value["small_category"]}</pre></td>
+                        <td style="width: 60px;"><pre style="text-align: center;">{value["detail_function"]}</pre></td>
+                        <td style="width: 60px;"><pre>{value["test_objectives"]}</pre></td>
+                        <td style="width: 60px;"><pre>{value["input_specification"]}</pre></td>
+                        <td style="width: 100px;"><pre>{value["pre_condition"]}</pre></td>
+                        <td style="width: 200px;"><pre>{value["test_procedure"]}</pre></td>
+                        <td style="width: 200px;"><pre>{value["expected_result"]}</pre></td>
                     </tr>
-    """
-    html_template += """
+"""
+    tc_data = json.dumps(test_case_data)
+    html_template += f"""
                 </tbody>
             </table>
         </div>
     <script>
-        function toggleVisibility(btn, os_name) {
+        function toggleVisibility(btn, os_name) {{
             const tbody = document.getElementById('fail_case');
             const os_list = tbody.querySelectorAll('.visible-tr');
-            os_list.forEach(tr => {
+            os_list.forEach(tr => {{
                 tr.classList.remove('visible-tr');
-            });
-    
-            const selector = `.toggle-tr.${os_name}`;
+            }});
+
+            const selector = `.toggle-tr.${{os_name}}`;
             if (!tbody) return;
             const tdsToToggle = tbody.querySelectorAll(selector);
-            tdsToToggle.forEach(tr => {
+            tdsToToggle.forEach(tr => {{
                 tr.classList.toggle('visible-tr');
-            });
+            }});
             const button_element = btn;
-            if (button_element.classList.contains('active')){
+            if (button_element.classList.contains('active')){{
                 button_element.classList.remove('active');
-                tdsToToggle.forEach(tr => {
+                tdsToToggle.forEach(tr => {{
                     tr.classList.remove('visible-tr');
-                });
-            } else {
+                }});
+            }} else {{
                 const btn_list = document.querySelectorAll('.toggle-button');
-                btn_list.forEach(button => {
+                btn_list.forEach(button => {{
                         button.classList.remove('active');
-                    });
+                    }});
                 button_element.classList.add('active');
-            } 
-    
-        }
-        function toggleImageSize(imageElement) {
+            }}
+        }}
+        function toggleImageSize(imageElement) {{
             const card = imageElement.closest('.card');
-            if (card.classList.contains('expanded')) {
+            if (card.classList.contains('expanded')) {{
                 card.classList.remove('expanded')
-            } else {
+            }} else {{
                 card.classList.add('expanded')
-            }
-        }
+            }}
+        }}
         var modal = document.getElementById("myModal");
         var modalImg = document.getElementById("img01");
-    
-        function openModal(src) {
+
+        function openModal(src) {{
             modal.style.display = "block";
-            modalImg.src = src; 
-        }
-    
-        function closeModal() {
+            modalImg.src = src;
+        }}
+
+        function closeModal() {{
             modal.style.display = "none";
-        }
-    
+        }}
+
         var tcModal = document.getElementById("tcModal");
         var tcid = document.getElementById("tcid");
         var middle_category = document.getElementById("middle_category");
         var small_category = document.getElementById("small_category");
         var detail_function = document.getElementById("detail_function");
-        var test_objective = document.getElementById("test_objective");
         var input_specification = document.getElementById("input_specification");
         var pre_condition = document.getElementById("pre_condition");
         var test_procedure = document.getElementById("test_procedure");
         var expected_result = document.getElementById("expected_result");
-    
-    
-        function openTcModal(test_case_id) {
-    """
-    tc_data = json.dumps(test_case_data)
-    html_template += f"""
+
+        function openTcModal(test_case_id) {{
             const testcaseData = {tc_data}
             tcModal.style.display = "flex";
             tcid.innerHTML = test_case_id
@@ -631,7 +599,7 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             test_procedure.innerHTML = testcaseData[test_case_id]["test_procedure"]
             expected_result.innerHTML = testcaseData[test_case_id]["expected_result"]
         }}
-    
+
         function closeTcModal() {{
             tcModal.style.display = "none";
         }}
@@ -642,11 +610,9 @@ def generate_html_report(total_result: dict, reviewed_data: dict, reviewed_resul
             tcListModal.style.display = "none";
         }}
     </script>
-    
-    
+
+
     </body>
     </html>
 """
-
     return html_template
-

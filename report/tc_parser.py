@@ -18,13 +18,13 @@ def load_all_tc_data():
     for root, _, files in os.walk(base_dir):
         sorted_files = sorted(files)
 
-        for file in sorted_files:
+        for filename in sorted_files:
             # .pyc 파일이거나 __init__.py 같은 특수 파일, .py가 아닌 파일은 건너뜀
-            if file.endswith(".pyc") or file.startswith("__") or not file.endswith(".py"):
+            if filename.endswith(".pyc") or filename.startswith("__") or not filename.endswith(".py"):
                 continue
 
-            file_path = os.path.join(root, file)
-            module_name = os.path.splitext(file)[0]
+            file_path = os.path.join(root, filename)
+            module_name = os.path.splitext(filename)[0]
 
             try:
                 spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -37,7 +37,6 @@ def load_all_tc_data():
                         test_case_data[module_name] = getattr(module, 'tc_info')
 
             except Exception as e:
-                # 기존의 뭉뚱그린 예외 처리 대신, 어떤 파일에서 무슨 에러가 났는지 정확히 출력
-                print(f"[TCParser] '{file}' 로드 중 오류 발생: {e}")
+                print(f"[TCParser] '{filename}' 로드 중 오류 발생: {e}")
 
     return test_case_data

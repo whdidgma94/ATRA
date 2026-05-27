@@ -53,38 +53,34 @@ def parse_result_file(file_path: str) -> Dict:
                 status = 'No run'
                 counts['no_run'] += 1
 
-            # 3. 유효한 상태값이 발견된 경우 처리
-            if status:
-                # 에러 메시지 추출 (-> 구분자 처리)
-                if '->' in line:
-                    error_msg = line.split('->', 1)[1].strip()
-                elif status != 'Pass':  # Pass가 아닌데 -> 가 없으면 라인 전체가 메시지일 수 있음
-                    # FAIL 등의 접두사 제거 (필요 시)
-                    error_msg = line.replace(status, '', 1).strip()
+            # 3. 에러 메시지 추출 (-> 구분자 처리)
+            if '->' in line:
+                error_msg = line.split('->', 1)[1].strip()
+            elif status != 'Pass':
+                error_msg = line.replace(status, '', 1).strip()
 
-                # 실행 시간 확인 (다음 줄 미리보기)
-                execution_time = ''
-                screenshot_folder = ''
-                if i + 1 < len(lines):
-                    next_line = lines[i + 1].strip()
-                    # 시간 형식인지 간단히 체크 (숫자와 콜론으로 구성된 경우)
-                    if re.match(r'\d{2}/\d{2} \d{2}:\d{2}', next_line):
-                        execution_time = next_line
-                        i += 1  # 시간을 읽었으므로 인덱스 하나 더 증가
-                        if status == "Minor_Fail":
-                            next_line = lines[i+1].strip()
-                            if re.match(r'\d{8}_\d{6}', next_line):
-                                screenshot_folder = next_line
+            # 실행 시간 확인 (다음 줄 미리보기)
+            execution_time = ''
+            screenshot_folder = ''
+            if i + 1 < len(lines):
+                next_line = lines[i + 1].strip()
+                # 시간 형식인지 간단히 체크 (숫자와 콜론으로 구성된 경우)
+                if re.match(r'\d{2}/\d{2} \d{2}:\d{2}', next_line):
+                    execution_time = next_line
+                    i += 1  # 시간을 읽었으므로 인덱스 하나 더 증가
+                    if status == "Minor_Fail":
+                        next_line = lines[i+1].strip()
+                        if re.match(r'\d{8}_\d{6}', next_line):
+                            screenshot_folder = next_line
+                            i += 1
 
-                                i += 1
-
-                test_cases.append({
-                    'name': current_case,
-                    'status': status,
-                    'error_msg': error_msg,
-                    'execution_time': execution_time,
-                    'screenshot_folder': screenshot_folder
-                })
+            test_cases.append({
+                'name': current_case,
+                'status': status,
+                'error_msg': error_msg,
+                'execution_time': execution_time,
+                'screenshot_folder': screenshot_folder
+            })
 
 
         # 다음 줄로 이동
