@@ -3,12 +3,10 @@ import os
 from appium import webdriver
 
 _wd = None
-_log_file = None
 
 
 def get_wd(udid=None, port=None, os_ver="", logdir="", system_port=None, desired_cap=None):
     global _wd
-    global _log_file
     if desired_cap is None:
         desired_cap = {
             "appium:deviceName": udid,
@@ -29,6 +27,5 @@ def get_wd(udid=None, port=None, os_ver="", logdir="", system_port=None, desired
             os.makedirs(logdir)
         if not os.path.exists(f"{logdir}/{os_ver}"):
             os.makedirs(f"{logdir}/{os_ver}")
-        _log_file = open(f"{logdir}/{os_ver}/log.txt", "a", encoding='utf-8')
 
     return _wd

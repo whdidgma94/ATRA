@@ -14,20 +14,11 @@ from datetime import datetime
 
 def get_testcases():
     tc_list = []
-
     tc_dir = os.path.join(application_path, "testcase")
-    for root1, _, testcase in os.walk(tc_dir):
-        sorted_testcase = sorted(testcase)
-        j = 0
-        while j < len(sorted_testcase):
-            tc = sorted_testcase[j]
-            if tc.endswith("pyc"):
-                j += 1
-                continue
-            if tc.endswith("py") and not tc.startswith("__"):
-                tc_list.append(tc.split(".")[0])
-            j += 1
-
+    for _, _, files in os.walk(tc_dir):
+        for tc in sorted(files):
+            if tc.endswith(".py") and not tc.startswith("__"):
+                tc_list.append(os.path.splitext(tc)[0])
     return tc_list
 
 
@@ -92,14 +83,16 @@ def run_test(wd, os_ver, log_direction, shared_dic):
 
     testcases_path = os.path.join(application_path, "testcase")
 
+    tc_path_map = {}
+    for root1, _, files in os.walk(testcases_path):
+        for fname in files:
+            if fname.endswith(".py") and not fname.startswith("__"):
+                tc_path_map[os.path.splitext(fname)[0]] = os.path.join(root1, fname)
+
     for script in tc_list:
         current_state[script] = 'Running'
         shared_dic[os_ver] = current_state
-        file_path = ""
-        for root1, _, dir1 in os.walk(testcases_path):
-            for tcid in dir1:
-                if tcid == script + ".py":
-                    file_path = os.path.join(root1, tcid)
+        file_path = tc_path_map.get(script, "")
 
         common_variable.tcid = script
         print(f"{os_ver} 실행 중 : {common_variable.tcid}")
