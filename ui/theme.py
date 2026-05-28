@@ -66,6 +66,7 @@ QPushButton#secondaryBtn {
     background-color: #f1f5f9;
     color: #334155;
     border: 1px solid #e2e8f0;
+    min-height: 0;
 }
 QPushButton#secondaryBtn:hover {
     background-color: #e2e8f0;
