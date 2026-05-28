@@ -19,12 +19,11 @@ _FAIL_LOG_WAIT = 5  # Fail 로그 수집 전 기기 상태 안정화 대기 시�
 
 def saveLog(msg):
     # TC 실행 중 문제 발견 시 호출. 버그리포트·로그캣·스크린샷을 저장한 뒤 TC를 즉시 중단합니다.
-    file = open(f"{common_variable.log_path}/log.txt", "a", encoding='utf-8')
-
     wdr = get_wd()
-
     time.sleep(_FAIL_LOG_WAIT)
-    file.write(msg + "\n")
+
+    with open(f"{common_variable.log_path}/log.txt", "a", encoding='utf-8') as file:
+        file.write(msg + "\n")
 
     output_dir = f'{common_variable.log_path}/{common_variable.tcid}'
 
@@ -38,11 +37,10 @@ def saveLog(msg):
             ["adb", '-s', udid, "bugreport", report_path],
             check=True,
             capture_output=True,
-            text=True,  # 텍스트 모드로 출력 캡처
+            text=True,
             encoding='utf-8',
             creationflags=subprocess.CREATE_NO_WINDOW
         )
-
     except subprocess.CalledProcessError as e:
         print(f"ADB 명령어 실행 오류: {e}")
         print(f"Stderr: {e.stderr}")
@@ -52,15 +50,13 @@ def saveLog(msg):
     log_path = f"{common_variable.log_path}/Logcat/logcat.txt"
     if not os.path.exists(f"{common_variable.log_path}/Logcat"):
         os.makedirs(f"{common_variable.log_path}/Logcat")
-    logFile = open(log_path, "a", encoding='utf-8')
-    logs = wdr.get_log('logcat')
-    for log in logs:
-        logFile.write(str(log['message']) + "\n")
-    logFile.write(time.strftime('%Y.%m.%d - %H:%M:%S'))
-    logFile.close()
+    with open(log_path, "a", encoding='utf-8') as logFile:
+        logs = wdr.get_log('logcat')
+        for log in logs:
+            logFile.write(str(log['message']) + "\n")
+        logFile.write(time.strftime('%Y.%m.%d - %H:%M:%S'))
     shutil.copy2(log_path, output_dir)
     wdr.save_screenshot(f"{output_dir}/screenshot.png")
-    file.close()
 
     sys.exit()
 
@@ -70,33 +66,31 @@ def entry_saveLog(msg):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    with open(f"{common_variable.log_path}/log.txt", "r", encoding='utf-8') as f:
-        content = f.read()
-        if msg in content:
+    log_file_path = f"{common_variable.log_path}/log.txt"
+    with open(log_file_path, "r", encoding='utf-8') as f:
+        if any(msg in line for line in f):
             return
 
     wdr = get_wd()
     time.sleep(_FAIL_LOG_WAIT)
     errTime = datetime.now().strftime('%Y%m%d_%H%M%S')
 
-    file = open(f"{common_variable.log_path}/log.txt", "a", encoding='utf-8')
+    with open(log_file_path, "a", encoding='utf-8') as file:
+        file.write(msg + "\n")
+        file.write(datetime.now().strftime('%m/%d %H:%M') + "\n")
+        file.write(errTime + "\n")
 
-    file.write(msg + "\n")
-    file.write(datetime.now().strftime('%m/%d %H:%M') + "\n")
-    file.write(errTime + "\n")
     output_dir = f'{common_variable.log_path}/{common_variable.tcid}/{errTime}'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     log_path = f"{common_variable.log_path}/Logcat/logcat.txt"
-    logFile = open(log_path, "a", encoding='utf-8')
-    logs = wdr.get_log('logcat')
-    for log in logs:
-        logFile.write(str(log['message']) + "\n")
-    logFile.close()
+    with open(log_path, "a", encoding='utf-8') as logFile:
+        logs = wdr.get_log('logcat')
+        for log in logs:
+            logFile.write(str(log['message']) + "\n")
     shutil.copy2(log_path, output_dir)
     wdr.save_screenshot(f"{output_dir}/screenshot.png")
-    file.close()
 
 
 def printl(msg):
@@ -117,71 +111,78 @@ def restart():
 # ── Element 탐색 ──────────────────────────────────────────────────────────────
 
 def get_appiumby(pram):
-    if pram.__contains__("//"):
+    if "//" in pram:
         appiumby = "xpath"
-    elif pram.__contains__("UiSelector"):
+    elif "UiSelector" in pram:
         appiumby = "-android uiautomator"
-    elif pram.__contains__("com.samsung.android") or pram.__contains__("android:id/") or pram.__contains__("com.sec.android.app.launcher") or pram.__contains__("com.android.permissioncontroller") or pram.__contains__("com.google.android.gms"):
+    elif ("com.samsung.android" in pram or "android:id/" in pram
+          or "com.sec.android.app.launcher" in pram
+          or "com.android.permissioncontroller" in pram
+          or "com.google.android.gms" in pram):
         appiumby = "id"
-    elif pram.__contains__("android.widget") or pram.__contains__("android.webkit"):
+    elif "android.widget" in pram or "android.webkit" in pram:
         appiumby = "class name"
     else:
         appiumby = "accessibility id"
     return appiumby
 
 
-def find(pram, click=False, ex = False, parent = None):
+def find(pram, click=False, ex=False, parent=None):
     wdr = get_wd()
 
     if ex and parent is None:
         wdr.implicitly_wait(1)
 
-    if not parent is None:
+    if parent is not None:
         wdr = parent
 
     appiumby = get_appiumby(pram)
 
     try:
-        t = wdr.find_element(appiumby, pram).is_displayed()
-    except (Exception,):
-        t = False
+        elem = wdr.find_element(appiumby, pram)
+        t = elem.is_displayed()
+    except Exception:
+        elem, t = None, False
     if t:
         if click:
-            wdr.find_element(appiumby, pram).click()
+            elem.click()
         if ex and parent is None:
             wdr.implicitly_wait(10)
         return t
 
     try:
-        t = wdr.find_element(appiumby, pram).is_enabled()
-    except (Exception,):
-        t = False
+        elem = wdr.find_element(appiumby, pram)
+        t = elem.is_enabled()
+    except Exception:
+        elem, t = None, False
     if t:
         if click:
-            wdr.find_element(appiumby, pram).click()
+            elem.click()
         if ex and parent is None:
             wdr.implicitly_wait(10)
         return t
     if parent is None:
         wdr.implicitly_wait(1)
     try:
-        t = wdr.find_element(pram).is_displayed()
-    except (Exception,):
-        t = False
+        elem = wdr.find_element(pram)
+        t = elem.is_displayed()
+    except Exception:
+        elem, t = None, False
     if t:
         if click:
-            wdr.find_element(pram).click()
+            elem.click()
         if ex and parent is None:
             wdr.implicitly_wait(10)
         return t
 
     try:
-        t = wdr.find_element(pram).is_enabled()
-    except (Exception,):
-        t = False
+        elem = wdr.find_element(pram)
+        t = elem.is_enabled()
+    except Exception:
+        elem, t = None, False
     if t:
         if click:
-            wdr.find_element(pram).click()
+            elem.click()
         if ex and parent is None:
             wdr.implicitly_wait(10)
         return t
@@ -191,7 +192,7 @@ def find(pram, click=False, ex = False, parent = None):
     return False
 
 
-def find_text(element, text, click = False, ex = False, parent = None):
+def find_text(element, text, click=False, ex=False, parent=None):
     wdr = get_wd()
     if not find(element, ex=ex, parent=parent):
         return False
@@ -199,16 +200,54 @@ def find_text(element, text, click = False, ex = False, parent = None):
     appiumby = get_appiumby(element)
     if parent is not None:
         wdr = parent
-    if not wdr.find_element(appiumby, element).get_attribute("text") == text:
+    elem = wdr.find_element(appiumby, element)
+    if elem.get_attribute("text") != text:
         return False
 
     if click:
-        wdr.find_element(appiumby, element).click()
+        elem.click()
 
     return True
 
 
-def find_enabled(element, click = False, ex=False, parent=None):
+def find_enabled(element, click=False, ex=False, parent=None):
+    wdr = get_wd()
+    if not find(element, ex=ex, parent=parent):
+        return False
+
+    appiumby = get_appiumby(element)
+    if parent is not None:
+        wdr = parent
+    elem = wdr.find_element(appiumby, element)
+    if not elem.is_enabled():
+        return False
+
+    if click:
+        elem.click()
+
+    return True
+
+
+def find_disabled(element, click=False, ex=False, parent=None):
+    wdr = get_wd()
+    if not find(element, ex=ex, parent=parent):
+        return False
+
+    if parent is not None:
+        wdr = parent
+
+    appiumby = get_appiumby(element)
+    elem = wdr.find_element(appiumby, element)
+    if elem.is_enabled():
+        return False
+
+    if click:
+        elem.click()
+
+    return True
+
+
+def find_checked(element, checked, click=False, ex=False, parent=None):
     wdr = get_wd()
     if not find(element, ex=ex, parent=parent):
         return False
@@ -217,66 +256,31 @@ def find_enabled(element, click = False, ex=False, parent=None):
     if parent is not None:
         wdr = parent
 
-    if not wdr.find_element(appiumby, element).is_enabled():
+    elem = wdr.find_element(appiumby, element)
+    if elem.get_attribute("checked") != checked:
         return False
 
     if click:
-        wdr.find_element(appiumby, element).click()
+        elem.click()
 
     return True
 
 
-def find_disabled(element, click = False, ex= False, parent = None):
-    wdr = get_wd()
-    if not find(element, ex=ex, parent=parent):
-        return False
-
-    if parent is not None:
-        wdr = parent
-
-    appiumby = get_appiumby(element)
-    if wdr.find_element(appiumby, element).is_enabled():
-        return False
-
-    if click:
-        wdr.find_element(appiumby, element).click()
-
-    return True
-
-
-def find_checked(element, checked, click = False, ex = False, parent = None):
+def find_selected(element, selected, click=False, ex=False, parent=None):
     wdr = get_wd()
     if not find(element, ex=ex, parent=parent):
         return False
 
     appiumby = get_appiumby(element)
-
     if parent is not None:
         wdr = parent
 
-    if not wdr.find_element(appiumby, element).get_attribute("checked") == checked:
+    elem = wdr.find_element(appiumby, element)
+    if elem.get_attribute("selected") != selected:
         return False
 
     if click:
-        wdr.find_element(appiumby, element).click()
-
-    return True
-
-
-def find_selected(element, selected, click = False, ex= False, parent = None):
-    wdr = get_wd()
-    if not find(element, ex = ex, parent=parent):
-        return False
-
-    appiumby = get_appiumby(element)
-    if parent is not None:
-        wdr = parent
-
-    if not wdr.find_element(appiumby, element).get_attribute("selected") == selected:
-        return False
-
-    if click:
-        wdr.find_element(appiumby, element).click()
+        elem.click()
 
     return True
 
@@ -293,26 +297,26 @@ def find_toast(text):
 
 # ── 입력 ──────────────────────────────────────────────────────────────────────
 
-def send_text(element, text, clear = False, parent = None):
+def send_text(element, text, clear=False, parent=None):
     wdr = get_wd()
     if not find(element, True, parent=parent):
         return False
 
     appiumby = get_appiumby(element)
-
     if parent is not None:
         wdr = parent
 
+    elem = wdr.find_element(appiumby, element)
     if clear:
-        wdr.find_element(appiumby, element).clear()
-    wdr.find_element(appiumby, element).send_keys(text)
+        elem.clear()
+    elem.send_keys(text)
 
     return True
 
 
 # ── 스크롤 / 제스처 ───────────────────────────────────────────────────────────
 
-def scrollDown(slightly = False):
+def scrollDown(slightly=False):
     wdr = get_wd()
     deviceSize = wdr.get_window_size()
     screenWidth = deviceSize['width']
@@ -401,13 +405,13 @@ def find_scroll_Down(a, b):
         scrollDown2(b)
 
 
-def long_press(pram, one_sec = False):
+def long_press(pram, one_sec=False):
     wdr = get_wd()
     if not find(pram):
         return False
     try:
         appiumby = get_appiumby(pram)
-        rect = wdr.find_element(appiumby,pram).rect
+        rect = wdr.find_element(appiumby, pram).rect
 
         center_x = rect['x'] + rect['width'] // 2
         center_y = rect['y'] + rect['height'] // 2

@@ -10,17 +10,16 @@ def get_device_info():
     return cv.device_model_map
 
 
+_LATE_OS = {"BOS", "COS"}
+
+
 def _parse_logs():
     parsed_results = {}
     os_list = [
         d for d in os.listdir(cv.base_log_path)
         if os.path.isdir(os.path.join(cv.base_log_path, d))
     ]
-    # BOS / COS를 마지막으로 정렬
-    for late_os in ("BOS", "COS"):
-        if late_os in os_list and os_list[0] == late_os:
-            os_list.remove(late_os)
-            os_list.append(late_os)
+    os_list.sort(key=lambda x: (x in _LATE_OS, x))
 
     for single_os in os_list:
         if single_os.endswith("exe"):
@@ -129,7 +128,8 @@ def aggregate_results(reviewed_results: dict, reviewed_data: dict, total_result:
 
 
 def finalize_report(
-    reviewed_data, reviewed_results, plm_info, total_result, comment_info, device_info
+    reviewed_data, reviewed_results, plm_info, total_result, comment_info, device_info,
+    test_case_data=None
 ):
     """HTML 리포트를 생성하고 (html_content, html_path)를 반환합니다."""
     html_path = f"{cv.base_log_path}/test_result.html"
@@ -141,7 +141,7 @@ def finalize_report(
         reviewed_data=reviewed_data,
         reviewed_results=reviewed_results,
         plm_info=plm_info,
-        test_case_data=load_all_tc_data(),
+        test_case_data=test_case_data if test_case_data is not None else load_all_tc_data(),
         comment_info=comment_info,
         device_info=device_info,
     )

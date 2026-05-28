@@ -259,6 +259,7 @@ class AppWindow(QMainWindow):
             total_result=self.total_result,
             comment_info=comment_info,
             device_info=cv.device_model_map,
+            test_case_data=self.test_case_data,
         )
 
         with open(html_path, "w", encoding="utf-8") as f:
