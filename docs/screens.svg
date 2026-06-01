@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440"
+     font-family="'Segoe UI','Malgun Gothic',sans-serif">
+  <defs>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1e293b" flood-opacity="0.09"/>
+    </filter>
+    <!-- window chrome gradient -->
+    <linearGradient id="titlebar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="440" rx="16" fill="#f1f5f9"/>
+  <text x="450" y="32" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b" letter-spacing="0.5">ATRA — 화면 순서</text>
+
+  <!-- ── CARD helper: each card = 130w × 200h ── -->
+  <!-- Row 1: cards 1-3  y=50 -->
+  <!-- Row 2: cards 4-6  y=270 -->
+  <!-- x positions: 30, 185, 340, 495, 650, 805 ... too wide for 900 -->
+  <!-- Use 3 per row, width=250, gap=20, total=3*250+4*20 = 830 centered in 900 => start x=35 -->
+  <!-- Actually 6 cards across would be: 6*130 + 7*10 = 850, start at 25 -->
+
+  <!-- card x positions: 25, 165, 305, 445, 585, 725  width=130 height=190 -->
+
+  <!-- ── Card 1: 모드 선택 ── -->
+  <g filter="url(#sh)">
+    <rect x="25" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <!-- titlebar -->
+    <rect x="25" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="25" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <!-- traffic lights -->
+    <circle cx="40" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="54" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="68" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <!-- screen content -->
+  <text x="90" y="106" text-anchor="middle" font-size="16" font-weight="800" fill="#2563eb" letter-spacing="2">ATRA</text>
+  <text x="90" y="120" text-anchor="middle" font-size="7" fill="#475569" letter-spacing="1">ANDROID TEST REPORT</text>
+  <rect x="45" y="134" width="90" height="20" rx="10" fill="#2563eb"/>
+  <text x="90" y="148" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">자동화 테스트 실행</text>
+  <rect x="45" y="162" width="90" height="20" rx="10" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="90" y="176" text-anchor="middle" font-size="9" fill="#334155">기존 로그로 리포트</text>
+  <!-- label -->
+  <text x="90" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">① 모드 선택</text>
+
+  <!-- ── Card 2: 기기 선택 ── -->
+  <g filter="url(#sh)">
+    <rect x="165" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <rect x="165" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="165" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <circle cx="180" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="194" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="208" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <text x="230" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#1e293b">기기 선택</text>
+  <!-- device rows -->
+  <rect x="175" y="108" width="110" height="22" rx="5" fill="#f8faff" stroke="#dbeafe" stroke-width="1"/>
+  <text x="185" y="123" font-size="8" fill="#1e293b">📱 Galaxy S24</text>
+  <text x="270" y="123" text-anchor="end" font-size="7" fill="#16a34a">연결됨</text>
+  <rect x="175" y="134" width="110" height="22" rx="5" fill="#f8faff" stroke="#dbeafe" stroke-width="1"/>
+  <text x="185" y="149" font-size="8" fill="#1e293b">📱 Galaxy A55</text>
+  <text x="270" y="149" text-anchor="end" font-size="7" fill="#16a34a">연결됨</text>
+  <rect x="175" y="160" width="110" height="22" rx="5" fill="#f8faff" stroke="#dbeafe" stroke-width="1"/>
+  <text x="185" y="175" font-size="8" fill="#1e293b">📱 Galaxy Z Fold</text>
+  <text x="270" y="175" text-anchor="end" font-size="7" fill="#16a34a">연결됨</text>
+  <rect x="185" y="196" width="90" height="18" rx="9" fill="#2563eb"/>
+  <text x="230" y="208" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">확인</text>
+  <text x="230" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">② 기기 선택</text>
+
+  <!-- ── Card 3: 테스트 진행 ── -->
+  <g filter="url(#sh)">
+    <rect x="305" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <rect x="305" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="305" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <circle cx="320" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="334" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="348" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <text x="370" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#1e293b">테스트 진행</text>
+  <!-- progress table header -->
+  <rect x="315" y="106" width="110" height="16" rx="3" fill="#f1f5f9"/>
+  <text x="340" y="117" font-size="7" font-weight="700" fill="#475569">TC</text>
+  <text x="390" y="117" text-anchor="middle" font-size="7" font-weight="700" fill="#475569">S24</text>
+  <text x="415" y="117" text-anchor="middle" font-size="7" font-weight="700" fill="#475569">A55</text>
+  <!-- rows -->
+  <text x="318" y="131" font-size="7" fill="#475569">BVT_0010</text>
+  <rect x="383" y="124" width="16" height="12" rx="3" fill="#dcfce7"/>
+  <text x="391" y="133" text-anchor="middle" font-size="7" fill="#16a34a">P</text>
+  <rect x="408" y="124" width="16" height="12" rx="3" fill="#fef9c3"/>
+  <text x="416" y="133" text-anchor="middle" font-size="7" fill="#854d0e">…</text>
+
+  <text x="318" y="148" font-size="7" fill="#475569">BVT_0020</text>
+  <rect x="383" y="141" width="16" height="12" rx="3" fill="#dcfce7"/>
+  <text x="391" y="150" text-anchor="middle" font-size="7" fill="#16a34a">P</text>
+  <rect x="408" y="141" width="16" height="12" rx="3" fill="#fee2e2"/>
+  <text x="416" y="150" text-anchor="middle" font-size="7" fill="#dc2626">F</text>
+
+  <text x="318" y="165" font-size="7" fill="#94a3b8">BVT_0030</text>
+  <rect x="383" y="158" width="16" height="12" rx="3" fill="#f1f5f9"/>
+  <text x="391" y="167" text-anchor="middle" font-size="7" fill="#94a3b8">-</text>
+  <rect x="408" y="158" width="16" height="12" rx="3" fill="#f1f5f9"/>
+  <text x="416" y="167" text-anchor="middle" font-size="7" fill="#94a3b8">-</text>
+
+  <!-- progress bar -->
+  <rect x="315" y="182" width="110" height="6" rx="3" fill="#e2e8f0"/>
+  <rect x="315" y="182" width="60" height="6" rx="3" fill="#2563eb"/>
+  <text x="370" y="205" text-anchor="middle" font-size="8" fill="#475569">2 / 5 진행 중</text>
+
+  <text x="370" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">③ 테스트 진행</text>
+
+  <!-- ── Card 4: 실패 검토 ── -->
+  <g filter="url(#sh)">
+    <rect x="445" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <rect x="445" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="445" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <circle cx="460" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="474" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="488" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <text x="510" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#1e293b">실패 검토</text>
+  <rect x="455" y="106" width="110" height="18" rx="4" fill="#fee2e2" stroke="#fecaca" stroke-width="1"/>
+  <text x="510" y="119" text-anchor="middle" font-size="8" font-weight="600" fill="#dc2626">FAIL — BVT_0020</text>
+  <!-- screenshot mock -->
+  <rect x="455" y="128" width="110" height="48" rx="4" fill="#1e293b"/>
+  <text x="510" y="158" text-anchor="middle" font-size="9" fill="#64748b">[ 스크린샷 ]</text>
+  <!-- buttons -->
+  <rect x="455" y="184" width="50" height="18" rx="9" fill="#16a34a"/>
+  <text x="480" y="196" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">Pass 처리</text>
+  <rect x="515" y="184" width="50" height="18" rx="9" fill="#ef4444"/>
+  <text x="540" y="196" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">Fail 유지</text>
+  <text x="510" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">④ 실패 검토</text>
+
+  <!-- ── Card 5: PLM 정보 ── -->
+  <g filter="url(#sh)">
+    <rect x="585" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <rect x="585" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="585" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <circle cx="600" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="614" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="628" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <text x="650" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#1e293b">PLM 이슈 입력</text>
+  <text x="598" y="118" font-size="8" fill="#475569">이슈 번호</text>
+  <rect x="595" y="122" width="110" height="16" rx="4" fill="#f8faff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="605" y="133" font-size="8" fill="#94a3b8">PLM-12345</text>
+  <text x="598" y="152" font-size="8" fill="#475569">코멘트</text>
+  <rect x="595" y="156" width="110" height="30" rx="4" fill="#f8faff" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="605" y="169" font-size="7" fill="#94a3b8">Wi-Fi 환경에서만</text>
+  <text x="605" y="180" font-size="7" fill="#94a3b8">재현됨</text>
+  <rect x="615" y="196" width="70" height="18" rx="9" fill="#2563eb"/>
+  <text x="650" y="208" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">확인</text>
+  <text x="650" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">⑤ PLM 입력</text>
+
+  <!-- ── Card 6: 이메일 폼 ── -->
+  <g filter="url(#sh)">
+    <rect x="725" y="52" width="130" height="190" rx="10" fill="#ffffff"/>
+    <rect x="725" y="52" width="130" height="24" rx="10" fill="url(#titlebar)"/>
+    <rect x="725" y="64" width="130" height="12" fill="url(#titlebar)"/>
+    <circle cx="740" cy="64" r="4" fill="#fe5f57"/>
+    <circle cx="754" cy="64" r="4" fill="#febc2e"/>
+    <circle cx="768" cy="64" r="4" fill="#28c840"/>
+  </g>
+  <text x="790" y="100" text-anchor="middle" font-size="10" font-weight="700" fill="#1e293b">이메일 폼 생성</text>
+  <!-- email preview box -->
+  <rect x="735" y="106" width="110" height="80" rx="4" fill="#f8faff" stroke="#dbeafe" stroke-width="1"/>
+  <rect x="735" y="106" width="110" height="16" rx="4" fill="#dbeafe"/>
+  <text x="790" y="118" text-anchor="middle" font-size="7" font-weight="700" fill="#1d4ed8">SmartThings BVT Report</text>
+  <text x="745" y="134" font-size="7" fill="#475569">Pass: 18  Fail: 2</text>
+  <text x="745" y="146" font-size="7" fill="#475569">Pass Rate: 90%</text>
+  <rect x="735" y="152" width="110" height="12" rx="2" fill="#e2e8f0"/>
+  <rect x="735" y="168" width="110" height="12" rx="2" fill="#e2e8f0"/>
+
+  <rect x="740" y="196" width="100" height="18" rx="9" fill="#2563eb"/>
+  <text x="790" y="208" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">이메일 전송</text>
+  <text x="790" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">⑥ 이메일 폼</text>
+
+  <!-- ── Arrows between cards ── -->
+  <!-- card center x: 90, 230, 370, 510, 650, 790 -->
+  <!-- right edge of each card: 155, 295, 435, 575, 715 -->
+  <!-- arrow y: 147 (center of 190px card starting at y=52 → center at y=147) -->
+  <line x1="155" y1="147" x2="165" y2="147" stroke="#94a3b8" stroke-width="1.5"
+        marker-end="url(#arr)"/>
+  <line x1="295" y1="147" x2="305" y2="147" stroke="#94a3b8" stroke-width="1.5"
+        marker-end="url(#arr)"/>
+  <line x1="435" y1="147" x2="445" y2="147" stroke="#94a3b8" stroke-width="1.5"
+        marker-end="url(#arr)"/>
+  <line x1="575" y1="147" x2="585" y2="147" stroke="#94a3b8" stroke-width="1.5"
+        marker-end="url(#arr)"/>
+  <line x1="715" y1="147" x2="725" y2="147" stroke="#94a3b8" stroke-width="1.5"
+        marker-end="url(#arr)"/>
+
+  <!-- Bottom note -->
+  <text x="450" y="288" text-anchor="middle" font-size="10" fill="#94a3b8">* 실패 없음 시 ④⑤ 건너뜀 · 리포트만 생성 모드는 ②③ 건너뜀</text>
+</svg>
